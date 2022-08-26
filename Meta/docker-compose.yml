@@ -1,0 +1,16 @@
+version: '3'
+name: 'csgotunes'
+services:
+  storage:
+    image: "mcr.microsoft.com/azure-storage/azurite:3.17.1"
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+  setupstorage:
+    image: "mcr.microsoft.com/azure-powershell:4.8.0-ubuntu-18.04"
+    volumes:
+      - ./Scripts:/Scripts
+    entrypoint: pwsh /Scripts/CreateLocalStorageResources.ps1
+    depends_on:
+      - storage
