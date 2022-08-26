@@ -1,0 +1,160 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "spotifyClientSecret": {
+            "type": "securestring"
+        }
+    },
+    "variables": {
+        "defaultResourceLocation": "[resourceGroup().location]",
+        "defaultResourceName": "[toLower(resourceGroup().name)]",
+        "subscriptionId": "[subscription().subscriptionId]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-06-01",
+            "name": "[variables('defaultResourceName')]",
+            "location": "[variables('defaultResourceLocation')]",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "StorageV2",
+            "properties": {
+                "accessTier": "Hot"
+            }
+        },
+        {
+            "name": "[concat(variables('defaultResourceName'), '/default')]",
+            "type": "Microsoft.Storage/storageAccounts/tableServices",
+            "apiVersion": "2019-06-01",
+            "properties": {
+                "cors": {
+                    "corsRules": [
+                        {
+                            "allowedOrigins": [
+                                "*"
+                            ],
+                            "allowedMethods": [
+                                "PUT",
+                                "GET",
+                                "POST"
+                            ],
+                            "maxAgeInSeconds": 0,
+                            "exposedHeaders": [
+                                "*"
+                            ],
+                            "allowedHeaders": [
+                                "*"
+                            ]
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('defaultResourceName'))]"
+            ]
+        },
+        {
+            "name": "[concat(variables('defaultResourceName'), '/default/users')]",
+            "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
+            "apiVersion": "2019-06-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('defaultResourceName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('defaultResourceName'))]"
+            ]
+        },
+        {
+            "name": "[concat(variables('defaultResourceName'), '/default/sessions')]",
+            "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
+            "apiVersion": "2019-06-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('defaultResourceName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('defaultResourceName'))]"
+            ]
+        },
+        {
+            "name": "[concat(variables('defaultResourceName'), '/default/nonces')]",
+            "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
+            "apiVersion": "2019-06-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('defaultResourceName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('defaultResourceName'))]"
+            ]
+        },
+        {
+           "type": "Microsoft.Web/serverfarms",
+           "apiVersion": "2016-09-01",
+           "name": "[variables('defaultResourceName')]",
+           "location": "[variables('defaultResourceLocation')]",
+           "properties": {
+              "name":"[variables('defaultResourceName')]",
+              "computeMode": "Dynamic"
+           },
+           "sku":{
+              "name":"Y1",
+              "tier":"Dynamic",
+              "size":"Y1",
+              "family":"Y",
+              "capacity":0
+           }
+        },
+        {
+            "apiVersion": "2016-03-01",
+            "type": "Microsoft.Web/sites",
+            "name": "[variables('defaultResourceName')]",
+            "location": "[variables('defaultResourceLocation')]",
+            "kind": "functionapp",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', variables('defaultResourceName'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('defaultResourceName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('defaultResourceName'))]"
+             ],
+            "properties": {
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('defaultResourceName'))]",
+                "siteConfig": {
+                    "appSettings": [
+                        {
+                            "name": "AzureWebJobsStorage",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('defaultResourceName'), ';AccountKey=', listKeys(resourceId(variables('subscriptionId'), variables('defaultResourceName'), 'Microsoft.Storage/storageAccounts', variables('defaultResourceName')), '2019-06-01').keys[0].value, ';EndpointSuffix=core.windows.net')]"
+                        },
+                        {
+                            "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('defaultResourceName'), ';AccountKey=', listKeys(resourceId(variables('subscriptionId'), variables('defaultResourceName'), 'Microsoft.Storage/storageAccounts', variables('defaultResourceName')), '2019-06-01').keys[0].value, ';EndpointSuffix=core.windows.net')]"
+                        },
+                        {
+                            "name": "WEBSITE_CONTENTSHARE",
+                            "value": "[variables('defaultResourceName')]"
+                        },
+                        {
+                            "name": "CSGOTunes__SpotifyClientID",
+                            "value": "a7f7aaf7130442b8b3a1e3af1104cfe6"
+                        },
+                        {
+                            "name": "CSGOTunes__SpotifyClientSecret",
+                            "value": "[parameters('spotifyClientSecret')]"
+                        },
+                        {
+                            "name": "CSGOTunes__SpotifyRedirectURI",
+                            "value": "https://www.cstunes.com/#callback"
+                        },
+                        {
+                            "name": "FUNCTIONS_WORKER_RUNTIME",
+                            "value": "dotnet"
+                        },
+                        {
+                            "name": "FUNCTIONS_EXTENSION_VERSION",
+                            "value": "~4"
+                        },
+                        {
+                            "name": "WEBSITE_RUN_FROM_PACKAGE",
+                            "value": "1"
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

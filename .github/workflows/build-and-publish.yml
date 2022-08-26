@@ -19,12 +19,38 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '18'
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: |
+            6.0.x
+      - name: 'Login Azure Service Principal'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Install Dependencies
         working-directory: repo/Website
         run: npm install
       - name: Build Site
         working-directory: repo/Website
         run: npm run build
+      - name: Build API
+        working-directory: repo/API
+        run: dotnet build --configuration Release --output ./output
+      - name: Deploy Infrastructure
+        working-directory: repo/Infrastructure
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resourceGroupName: csgotunes
+          template: ./csgotunes.json
+          parameters: 'spotifyClientSecret=${{ secrets.SPOTIFY_CLIENT_SECRET }}'
+      - name: 'Deploy API'
+        uses: Azure/functions-action@v1
+        working-directory: repo/API
+        with:
+          app-name: csgotunes
+          package: './output'
       - name: Checkout GH Pages
         uses: actions/checkout@v2
         with:

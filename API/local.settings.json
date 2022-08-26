@@ -2,6 +2,13 @@
     "IsEncrypted": false,
     "Values": {
         "AzureWebJobsStorage": "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://localhost:10000/devstoreaccount1;QueueEndpoint=http://localhost:10001/devstoreaccount1;TableEndpoint=http://localhost:10002/devstoreaccount1;",
+        "CSGOTunes__SpotifyClientID": "a7f7aaf7130442b8b3a1e3af1104cfe6",
+        "CSGOTunes__SpotifyRedirectURI": "http://localhost:1234/#callback",
         "FUNCTIONS_WORKER_RUNTIME": "dotnet"
+    },
+    "Host": {
+        "LocalHttpPort": 7071,
+        "CORS": "*",
+        "CORSCredentials": false
     }
 }
