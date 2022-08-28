@@ -39,7 +39,7 @@ jobs:
         run: mkdir -p docs
       - name: Create CNAME File
         working-directory: gh-pages
-        run: echo 'www.csgotunes.com' > docs/CNAME
+        run: echo 'www.cstunes.com' > docs/CNAME
       - name: Copy Distribution Folder to Docs
         run: cp -R repo/Website/Distribution/* gh-pages/docs/
       - name: Create Version Text File
