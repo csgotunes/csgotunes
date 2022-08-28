@@ -2,6 +2,8 @@ import React, { MouseEvent, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { InitAuthResponse } from '../Models/InitAuthResponse';
 import { getApiBaseUrl } from '../Utils';
+import { Header } from '../Components/Header';
+import { Footer } from '../Components/Footer';
 
 export const LoginPage: React.FunctionComponent<any> = () => {
   const history = useHistory();
@@ -42,8 +44,15 @@ export const LoginPage: React.FunctionComponent<any> = () => {
   };
 
   return (
-    <div>
-      <button disabled={loggingIn} onClick={onLoginButtonClick}>Login to Spotify</button>
+    <div id="loginPage" className="page">
+      <Header />
+      <div id="welcome" className="section">
+        <div className="content">
+          <p>Vibe out to music while playing Counter-Strike: Global Offensive without sacrificing awareness. CS:GO Tunes can automatically pause your music when you respawn, and resume the track once you are eliminated from the round. To get started, login with Spotify using the button below!</p>
+          <button id="loginButton" disabled={loggingIn} onClick={onLoginButtonClick}>Login to Spotify</button>
+        </div>
+      </div>
+      <Footer />
     </div>
   );
 };
