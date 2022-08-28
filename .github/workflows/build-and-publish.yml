@@ -33,24 +33,24 @@ jobs:
         run: npm install
       - name: Build Site
         working-directory: repo/Website
+        env:
+          API_BASE_URL: 'https://csgotunes.azurewebsites.net/api'
         run: npm run build
       - name: Build API
         working-directory: repo/API
         run: dotnet build --configuration Release --output ./output
       - name: Deploy Infrastructure
-        working-directory: repo/Infrastructure
         uses: azure/arm-deploy@v1
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resourceGroupName: csgotunes
-          template: ./csgotunes.json
+          template: ./repo/Infrastructure/csgotunes.json
           parameters: 'spotifyClientSecret=${{ secrets.SPOTIFY_CLIENT_SECRET }}'
       - name: 'Deploy API'
         uses: Azure/functions-action@v1
-        working-directory: repo/API
         with:
           app-name: csgotunes
-          package: './output'
+          package: './repo/API/output'
       - name: Checkout GH Pages
         uses: actions/checkout@v2
         with:
