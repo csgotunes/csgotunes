@@ -115,6 +115,9 @@
             "properties": {
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('defaultResourceName'))]",
                 "siteConfig": {
+                    "cors": {
+                        "allowedOrigins": ["https://www.cstunes.com"]
+                    },
                     "appSettings": [
                         {
                             "name": "AzureWebJobsStorage",
