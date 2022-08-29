@@ -102,7 +102,7 @@ namespace CSGOTunes.API.GameState.Functions
                              && user.IsAlive
                              && isLifeChangeNewerEvent;
 
-            var didJustSpawn = gameStateRequest.Player.State.Health >= 0
+            var didJustSpawn = gameStateRequest.Player.State.Health > 0
                                && !user.IsAlive
                                && isLifeChangeNewerEvent;
 
