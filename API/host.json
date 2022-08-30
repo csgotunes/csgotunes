@@ -6,5 +6,8 @@
                 "isEnabled": true
             }
         }
+    },
+    "queues": {
+        "maxDequeueCount": 1
     }
 }

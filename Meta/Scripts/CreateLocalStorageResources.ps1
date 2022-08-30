@@ -3,3 +3,4 @@ $StorageContext = New-AzStorageContext -ConnectionString "DefaultEndpointsProtoc
 New-AzStorageTable -Name "users" -Context $StorageContext
 New-AzStorageTable -Name "nonces" -Context $StorageContext
 New-AzStorageTable -Name "sessions" -Context $StorageContext
+New-AzStorageQueue –Name "game-state" -Context $storageContext

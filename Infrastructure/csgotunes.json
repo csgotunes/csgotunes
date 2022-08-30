@@ -85,6 +85,17 @@
             ]
         },
         {
+            "type": "queueServices/queues",
+            "apiVersion": "2019-06-01",
+            "name": "default/game-state",
+            "properties": {
+                "metadata": {}
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('defaultResourceName'))]"
+            ]
+        },
+        {
             "apiVersion": "2018-05-01-preview",
             "name": "[variables('defaultResourceName')]",
             "type": "Microsoft.Insights/components",
