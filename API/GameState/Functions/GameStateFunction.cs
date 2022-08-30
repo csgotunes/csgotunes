@@ -64,7 +64,7 @@ namespace CSGOTunes.API.GameState.Functions
 
             var user = await this.userRepository.GetByIDAsync(spotifyUserID, cancellationToken);
 
-            if (user == null || user.CFGKey != cfgKey)
+            if (user == null || user.CFGKey != cfgKey || user.IsDisabled)
             {
                 return new NotFoundResult();
             }
