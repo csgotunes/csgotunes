@@ -53,10 +53,10 @@ namespace CSGOTunes.API.Spotify.Interfaces
         /// </summary>
         /// <param name="accessToken">The access token for the user.</param>
         /// <param name="cancellationToken">An instance of <see cref="CancellationToken"/>.</param>
-        /// <returns>An instance of <see cref="PlaybackStateResponse"/>.</returns>
+        /// <returns>An instance of <see cref="PlaybackStateResponse"/> or null if the endpoint returned no content (which indicates no active playback state).</returns>
         /// <exception cref="SpotifyTokenExpiredException">If the access token has expired or is bad.</exception>
         /// <exception cref="GetPlayerException">If the endpoint returns an error.</exception>
-        Task<PlaybackStateResponse> GetPlayerAsync(
+        Task<PlaybackStateResponse?> GetPlayerAsync(
             string accessToken,
             CancellationToken cancellationToken);
 

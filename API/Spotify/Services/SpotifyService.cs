@@ -149,7 +149,7 @@ namespace CSGOTunes.API.Spotify.Services
         }
 
         /// <inheritdoc cref="ISpotifyService"/>
-        public async Task<PlaybackStateResponse> GetPlayerAsync(
+        public async Task<PlaybackStateResponse?> GetPlayerAsync(
             string accessToken,
             CancellationToken cancellationToken)
         {
@@ -188,6 +188,11 @@ namespace CSGOTunes.API.Spotify.Services
             catch (Exception ex) when (ex is not SpotifyTokenExpiredException)
             {
                 throw new GetMeException("Unable to get user's playback state.", ex);
+            }
+
+            if (httpResponseMessage.StatusCode == HttpStatusCode.NoContent)
+            {
+                return null;
             }
 
             var responseString = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken);

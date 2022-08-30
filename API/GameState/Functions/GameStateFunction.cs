@@ -120,7 +120,8 @@ namespace CSGOTunes.API.GameState.Functions
                 cancellationToken);
 
             // We can't do anything if there is no playback device or if it is restricted (ie: blocking web API calls).
-            if (playbackStateResponse.Device == null
+            if (playbackStateResponse == null
+                || playbackStateResponse.Device == null
                 || string.IsNullOrWhiteSpace(playbackStateResponse.Device.ID)
                 || playbackStateResponse.Device.IsRestricted)
             {
