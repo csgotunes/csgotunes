@@ -1,12 +1,10 @@
-// <copyright file="GameStateFunction.cs" company="CS:GO Tunes">
+// <copyright file="ProcessGameStateFunction.cs" company="CS:GO Tunes">
 // Copyright (c) CS:GO Tunes. All rights reserved.
 // </copyright>
 
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using CSGOTunes.API.Extensions;
 using CSGOTunes.API.GameState.Models;
 using CSGOTunes.API.Spotify.Interfaces;
 using CSGOTunes.API.Users.Helpers;
@@ -14,25 +12,25 @@ using CSGOTunes.API.Users.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace CSGOTunes.API.GameState.Functions
 {
     /// <summary>
     /// Processes game-state integration events.
     /// </summary>
-    public sealed class GameStateFunction
+    public sealed class ProcessGameStateFunction
     {
         private readonly ISpotifyService spotifyService;
         private readonly IUserRepository userRepository;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="GameStateFunction"/> class.
+        /// Initializes a new instance of the <see cref="ProcessGameStateFunction"/> class.
         /// </summary>
         /// <param name="spotifyService">An instance of <see cref="ISpotifyService"/>.</param>
         /// <param name="userRepository">An instance of <see cref="IUserRepository"/>.</param>
-        public GameStateFunction(
+        public ProcessGameStateFunction(
             ISpotifyService spotifyService,
             IUserRepository userRepository)
         {
@@ -41,32 +39,41 @@ namespace CSGOTunes.API.GameState.Functions
         }
 
         /// <summary>
-        /// Run the function and complete authentication.
+        /// Run the function and process the game state event.
         /// </summary>
-        /// <param name="httpRequest">An instance of <see cref="HttpRequest"/>.</param>
+        /// <param name="queueItem">An instance of <see cref="HttpRequest"/>.</param>
         /// <param name="log">An instance of <see cref="ILogger"/>.</param>
         /// <param name="cancellationToken">An instance of <see cref="CancellationToken"/>.</param>
         /// <returns>An instance of <see cref="NoContentResult"/>.</returns>
-        [FunctionName(nameof(GameStateFunction))]
-        public async Task<IActionResult> RunAsync(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "game-state")]
-            HttpRequest httpRequest,
+        [FunctionName(nameof(ProcessGameStateFunction))]
+        public async Task RunAsync(
+            [QueueTrigger("game-state")]
+            string queueItem,
             ILogger log,
             CancellationToken cancellationToken)
         {
-            var spotifyUserID = httpRequest.Query["spotifyUserID"].FirstOrDefault() ?? string.Empty;
-            var cfgKey = httpRequest.Query["cfgKey"].FirstOrDefault() ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(spotifyUserID) || string.IsNullOrWhiteSpace(cfgKey))
+            if (string.IsNullOrWhiteSpace(queueItem))
             {
-                return new NotFoundResult();
+                return;
             }
 
-            var user = await this.userRepository.GetByIDAsync(spotifyUserID, cancellationToken);
+            var gameStateEvent = JsonConvert.DeserializeObject<GameStateEventModel>(queueItem);
 
-            if (user == null || user.CFGKey != cfgKey || user.IsDisabled)
+            if (gameStateEvent == null || gameStateEvent.Request == null)
             {
-                return new NotFoundResult();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(gameStateEvent.SpotifyUserID) || string.IsNullOrWhiteSpace(gameStateEvent.CFGKey))
+            {
+                return;
+            }
+
+            var user = await this.userRepository.GetByIDAsync(gameStateEvent.SpotifyUserID, cancellationToken);
+
+            if (user == null || user.CFGKey != gameStateEvent.CFGKey || user.IsDisabled)
+            {
+                return;
             }
 
             user = user with
@@ -76,40 +83,33 @@ namespace CSGOTunes.API.GameState.Functions
 
             await this.userRepository.UpdateAsync(user, cancellationToken);
 
-            var (gameStateRequest, modelState) = await httpRequest.ReadAndValidateAsync<GameStateRequestModel>(cancellationToken);
-
-            if (gameStateRequest == null || !modelState.IsValid)
-            {
-                return new BadRequestObjectResult(new ValidationProblemDetails(modelState));
-            }
-
             // Ignore this event if we aren't getting something for the provider.
-            if (gameStateRequest.Provider == null
-                || string.IsNullOrWhiteSpace(gameStateRequest.Provider.SteamID)
-                || gameStateRequest.Player?.SteamID == null
-                || gameStateRequest.Player.State == null
-                || !gameStateRequest.Player.SteamID.Equals(
-                    gameStateRequest.Provider.SteamID,
+            if (gameStateEvent.Request.Provider == null
+                || string.IsNullOrWhiteSpace(gameStateEvent.Request.Provider.SteamID)
+                || gameStateEvent.Request.Player?.SteamID == null
+                || gameStateEvent.Request.Player.State == null
+                || !gameStateEvent.Request.Player.SteamID.Equals(
+                    gameStateEvent.Request.Provider.SteamID,
                     StringComparison.InvariantCultureIgnoreCase))
             {
-                return new NoContentResult();
+                return;
             }
 
-            var timestampMilliseconds = (long)gameStateRequest.Provider.Timestamp * 1000;
+            var timestampMilliseconds = (long)gameStateEvent.Request.Provider.Timestamp * 1000;
             var isLifeChangeNewerEvent = timestampMilliseconds >= user.AliveStateChangeTimestamp;
 
-            var didJustDie = gameStateRequest.Player.State.Health <= 0
+            var didJustDie = gameStateEvent.Request.Player.State.Health <= 0
                              && user.IsAlive
                              && isLifeChangeNewerEvent;
 
-            var didJustSpawn = gameStateRequest.Player.State.Health > 0
+            var didJustSpawn = gameStateEvent.Request.Player.State.Health > 0
                                && !user.IsAlive
                                && isLifeChangeNewerEvent;
 
             // No need to waste cycles if there wasn't some sort of state change.
             if (!didJustDie && !didJustSpawn)
             {
-                return new NoContentResult();
+                return;
             }
 
             var playbackStateResponse = await UserBoundedHelpers.DoUserBoundedOperationAsync(
@@ -125,7 +125,7 @@ namespace CSGOTunes.API.GameState.Functions
                 || string.IsNullOrWhiteSpace(playbackStateResponse.Device.ID)
                 || playbackStateResponse.Device.IsRestricted)
             {
-                return new NoContentResult();
+                return;
             }
 
             if (didJustDie && !playbackStateResponse.IsPlaying)
@@ -161,7 +161,6 @@ namespace CSGOTunes.API.GameState.Functions
             };
 
             await this.userRepository.UpdateAsync(user, cancellationToken);
-            return new NoContentResult();
         }
     }
 }

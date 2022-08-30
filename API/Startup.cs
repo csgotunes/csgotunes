@@ -43,6 +43,7 @@ namespace CSGOTunes.API
             {
                 var azureConnectionString = builder.GetContext().Configuration["AzureWebJobsStorage"];
                 clientFactoryBuilder.AddTableServiceClient(azureConnectionString);
+                clientFactoryBuilder.AddQueueServiceClient(azureConnectionString);
             });
 
             // Register our repositories
