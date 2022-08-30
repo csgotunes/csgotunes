@@ -85,9 +85,9 @@
             ]
         },
         {
-            "type": "queueServices/queues",
+            "type": "Microsoft.Storage/storageAccounts/queueServices/queues",
             "apiVersion": "2019-06-01",
-            "name": "default/game-state",
+            "name": "[concat(variables('defaultResourceName'), '/default/game-state')]",
             "properties": {
                 "metadata": {}
             },
