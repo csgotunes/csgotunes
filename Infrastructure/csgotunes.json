@@ -85,6 +85,21 @@
             ]
         },
         {
+            "apiVersion": "2018-05-01-preview",
+            "name": "[variables('defaultResourceName')]",
+            "type": "Microsoft.Insights/components",
+            "location": "[variables('defaultResourceLocation')]",
+            "kind": "web",
+            "tags": {
+                "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('defaultResourceName'))]": "Resource",
+                "displayName": "AppInsightsComponent"
+            },
+            "properties": {
+                "Application_Type": "web",
+                "SamplingPercentage": 1
+            }
+        },
+        {
            "type": "Microsoft.Web/serverfarms",
            "apiVersion": "2016-09-01",
            "name": "[variables('defaultResourceName')]",
@@ -110,7 +125,8 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Web/serverfarms', variables('defaultResourceName'))]",
                 "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('defaultResourceName'), 'default')]",
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('defaultResourceName'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('defaultResourceName'))]",
+                "[resourceId('Microsoft.Insights/components', variables('defaultResourceName'))]"
              ],
             "properties": {
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('defaultResourceName'))]",
@@ -130,6 +146,14 @@
                         {
                             "name": "WEBSITE_CONTENTSHARE",
                             "value": "[variables('defaultResourceName')]"
+                        },
+                        {
+                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                            "value": "[reference(resourceId(variables('subscriptionId'), variables('defaultResourceName'), 'microsoft.insights/components', variables('defaultResourceName')), '2018-05-01-preview').InstrumentationKey]"
+                        },
+                        {
+                            "name": "ApplicationInsights__InstrumentationKey",
+                            "value": "[reference(resourceId(variables('subscriptionId'), variables('defaultResourceName'), 'microsoft.insights/components', variables('defaultResourceName')), '2018-05-01-preview').InstrumentationKey]"
                         },
                         {
                             "name": "CSGOTunes__SpotifyClientID",
