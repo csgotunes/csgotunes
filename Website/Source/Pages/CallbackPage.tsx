@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { getApiBaseUrl, isNullOrWhitespace } from '../Utils';
 import { CompleteAuthResponse } from '../Models/CompleteAuthResponse';
 import { useHistory } from 'react-router-dom';
+import { setSession } from '../Utils/AuthUtils';
 
 export const CallbackPage: React.FunctionComponent<any> = () => {
   const history = useHistory();
@@ -34,7 +35,7 @@ export const CallbackPage: React.FunctionComponent<any> = () => {
       }
 
       const completeAuthResponse: CompleteAuthResponse = await response.json();
-      localStorage.setItem('CSGOTunesAuthToken', completeAuthResponse.sessionID);
+      setSession(completeAuthResponse.sessionID);
 
       // FIXME: This is a hack to remove the query string parameters.
       // For some reason, when you try to use `history.replace` it does not work properly.

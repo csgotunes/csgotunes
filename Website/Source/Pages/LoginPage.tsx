@@ -4,15 +4,16 @@ import { InitAuthResponse } from '../Models/InitAuthResponse';
 import { getApiBaseUrl } from '../Utils';
 import { Header } from '../Components/Header';
 import { Footer } from '../Components/Footer';
+import { getSession } from '../Utils/AuthUtils';
 
 export const LoginPage: React.FunctionComponent<any> = () => {
   const history = useHistory();
   const [loggingIn, setLoggingIn] = useState<boolean>(false);
 
   useEffect(() => {
-    const sessionId = localStorage.getItem('CSGOTunesAuthToken');
+    const sessionId = getSession();
 
-    if (sessionId !== null && sessionId.trim() !== '') {
+    if (sessionId !== null) {
       history.push('/dashboard');
     }
   }, []);

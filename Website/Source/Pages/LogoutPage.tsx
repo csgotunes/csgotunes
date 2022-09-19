@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import { clearSession } from '../Utils/AuthUtils';
 
 export const LogoutPage: React.FunctionComponent<any> = () => {
   const history = useHistory();
 
   useEffect(() => {
-    localStorage.removeItem('CSGOTunesAuthToken');
+    clearSession();
     history.push('/login');
   }, []);
 
