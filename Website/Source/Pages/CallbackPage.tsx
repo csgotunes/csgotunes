@@ -3,9 +3,11 @@ import { getApiBaseUrl, isNullOrWhitespace } from '../Utils';
 import { CompleteAuthResponse } from '../Models/CompleteAuthResponse';
 import { useHistory } from 'react-router-dom';
 import { setSession } from '../Utils/AuthUtils';
+import { useTranslation } from 'react-i18next';
 
 export const CallbackPage: React.FunctionComponent<any> = () => {
   const history = useHistory();
+  const { t } = useTranslation();
 
   useEffect(() => {
     void (async function () {
@@ -47,7 +49,7 @@ export const CallbackPage: React.FunctionComponent<any> = () => {
 
   return (
     <div>
-      <p>Loading...</p>
+      <p>{t('loading')}</p>
     </div>
   );
 };

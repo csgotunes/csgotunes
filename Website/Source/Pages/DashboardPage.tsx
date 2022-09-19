@@ -4,10 +4,12 @@ import { getApiBaseUrl } from '../Utils';
 import { UserProfileResponse } from '../Models/UserProfileResponse';
 import FileSaver from 'file-saver';
 import { clearSession, getSession } from '../Utils/AuthUtils';
+import { useTranslation } from 'react-i18next';
 
 export const DashboardPage: React.FunctionComponent<any> = () => {
   const history = useHistory();
   const [isDownloadingConfig, setDownloadingConfig] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const sessionId = getSession();
@@ -82,8 +84,8 @@ export const DashboardPage: React.FunctionComponent<any> = () => {
 
   return (
     <div>
-      <p>Welcome to the dashboard.</p>
-      <button onClick={downloadConfig} disabled={isDownloadingConfig}>Download CFG</button>
+      <p>{t('dashboard_welcome')}</p>
+      <button onClick={downloadConfig} disabled={isDownloadingConfig}>{t('download_cfg_button')}</button>
     </div>
   );
 };

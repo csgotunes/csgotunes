@@ -1,9 +1,12 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export const Footer: React.FunctionComponent<any> = () => {
+  const { t } = useTranslation();
+
   return (
     <div id="footer">
-      <p>CS:GO Tunes is not affiliated with Valve or Spotify.</p>
+      <p>{t('disclaimer')}</p>
     </div>
   );
 };

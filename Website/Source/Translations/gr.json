@@ -1,0 +1,9 @@
+{
+  "welcome_paragraph": "Vibe out to music while playing Counter-Strike: Global Offensive without sacrificing awareness. CS:GO Tunes can automatically pause your music when you respawn, and resume the track once you are eliminated from the round. To get started, login with Spotify using the button below!",
+  "login_button": "Login to Spotify",
+  "logging_out": "Logging out...",
+  "loading": "Loading...",
+  "dashboard_welcome": "Welcome to the dashboard.",
+  "download_cfg_button": "Download CFG",
+  "disclaimer": "CS:GO Tunes is not affiliated with Valve or Spotify."
+}
