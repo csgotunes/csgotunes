@@ -5,5 +5,7 @@
   "loading": "Loading...",
   "dashboard_welcome": "Welcome to the dashboard.",
   "download_cfg_button": "Download CFG",
-  "disclaimer": "CS:GO Tunes is not affiliated with Valve or Spotify."
+  "disclaimer": "CS:GO Tunes is not affiliated with Valve or Spotify.",
+  "enable_button": "Enable CS:GO Tunes",
+  "disable_button": "Disable CS:GO Tunes"
 }

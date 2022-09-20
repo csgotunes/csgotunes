@@ -5,10 +5,16 @@ import { UserProfileResponse } from '../Models/UserProfileResponse';
 import FileSaver from 'file-saver';
 import { clearSession, getSession } from '../Utils/AuthUtils';
 import { useTranslation } from 'react-i18next';
+import { UpdateUserProfileRequest } from '../Models/UpdateUserProfileRequest';
 
 export const DashboardPage: React.FunctionComponent<any> = () => {
   const history = useHistory();
-  const [isDownloadingConfig, setDownloadingConfig] = useState(false);
+  const [isLoading, setLoading] = useState(false);
+  const [isDisabled, setDisabled] = useState(false);
+  const [isSettingDisabledPreference, setSettingDisabledPreference] = useState(false);
+  const [spotifyUserID, setSpotifyUserID] = useState<string | null>(null);
+  const [cfgKey, setCFGKey] = useState<string | null>(null);
+
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -18,9 +24,11 @@ export const DashboardPage: React.FunctionComponent<any> = () => {
       clearSession();
       history.push('/login');
     }
+
+    loadProfile();
   }, []);
 
-  const downloadConfig = (e: MouseEvent<HTMLButtonElement>): void => {
+  const loadProfile = (): void => {
     void (async function () {
       try {
         const sessionId = getSession();
@@ -34,7 +42,7 @@ export const DashboardPage: React.FunctionComponent<any> = () => {
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionId}` }
         };
 
-        setDownloadingConfig(true);
+        setLoading(true);
         const response = await fetch(getApiBaseUrl() + '/user-profile', requestOptions);
 
         if (response.status >= 400) {
@@ -42,10 +50,60 @@ export const DashboardPage: React.FunctionComponent<any> = () => {
         }
 
         const userProfileResponse: UserProfileResponse = await response.json();
-        const encodedSpotifyUserId = encodeURIComponent(userProfileResponse.spotifyUserID);
-        const encodedCFGKey = encodeURIComponent(userProfileResponse.cfgKey);
+        setSpotifyUserID(userProfileResponse.spotifyUserID);
+        setCFGKey(userProfileResponse.cfgKey);
+        setDisabled(userProfileResponse.isDisabled);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  };
 
-        const userConfig = `
+  const setDisabledPreference = (isDisabled: boolean): void => {
+    void (async function () {
+      try {
+        const sessionId = getSession();
+
+        if (sessionId === null) {
+          return;
+        }
+
+        const request: UpdateUserProfileRequest = {
+          isDisabled
+        };
+
+        const requestOptions: RequestInit = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${sessionId}`
+          },
+          body: JSON.stringify(request)
+        };
+
+        setSettingDisabledPreference(true);
+        const response = await fetch(getApiBaseUrl() + '/user-profile', requestOptions);
+
+        if (response.status >= 400) {
+          console.log('Oh, no!');
+        }
+
+        loadProfile();
+      } finally {
+        setSettingDisabledPreference(false);
+      }
+    })();
+  };
+
+  const downloadConfig = (e: MouseEvent<HTMLButtonElement>): void => {
+    if (spotifyUserID === null || cfgKey === null) {
+      return;
+    }
+
+    const encodedSpotifyUserId = encodeURIComponent(spotifyUserID);
+    const encodedCFGKey = encodeURIComponent(cfgKey);
+
+    const userConfig = `
 "CS:GO Tunes"
 {
  "uri" "https://csgotunes.azurewebsites.net/api/game-state?spotifyUserID=${encodedSpotifyUserId}&cfgKey=${encodedCFGKey}"
@@ -72,20 +130,22 @@ export const DashboardPage: React.FunctionComponent<any> = () => {
 }
         `;
 
-        const blob = new Blob([userConfig], {
-          type: 'text/plain;charset=utf-8'
-        });
-        FileSaver.saveAs(blob, 'gamestate_integration_csgotunes.cfg');
-      } finally {
-        setDownloadingConfig(false);
-      }
-    })();
+    const blob = new Blob([userConfig], {
+      type: 'text/plain;charset=utf-8'
+    });
+    FileSaver.saveAs(blob, 'gamestate_integration_csgotunes.cfg');
   };
-
   return (
     <div>
       <p>{t('dashboard_welcome')}</p>
-      <button onClick={downloadConfig} disabled={isDownloadingConfig}>{t('download_cfg_button')}</button>
+      <button onClick={downloadConfig} disabled={isLoading}>{t('download_cfg_button')}</button>
+      {isDisabled
+        ? (
+            <button onClick={(e: MouseEvent<HTMLButtonElement>) => setDisabledPreference(false)} disabled={isLoading}>{t('enable_button')}</button>
+          )
+        : (
+        <button onClick={(e: MouseEvent<HTMLButtonElement>) => setDisabledPreference(true)} disabled={isLoading || isSettingDisabledPreference}>{t('disable_button')}</button>
+          )}
     </div>
   );
 };
