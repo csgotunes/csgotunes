@@ -20,7 +20,9 @@ First, make sure you have the latest version of Docker on your machine (you will
 
 Next, install the latest version of Node.js using the instructions here: https://nodejs.org/en/download/
 
-Lastly, you will need to install the latest .NET SDK (minimum version 6): https://dotnet.microsoft.com/en-us/download
+Then, you will need to install the latest .NET SDK (minimum version 6): https://dotnet.microsoft.com/en-us/download
+
+Lastly, install the Azure Functions Core Tools for version 4: https://github.com/Azure/azure-functions-core-tools
 
 ### Spotify Developer Setup
 
@@ -55,9 +57,9 @@ Using your IDE of choice (ie: JetBrains Rider or Visual Studio), you should be a
 If you would prefer to launch from the command line/terminal, simply run the following command:
 ```bash
 cd API
-dotnet install
+dotnet restore
 dotnet build
-dotnet run
+func host start --pause-on-error
 ```
 
 ### Running Website
