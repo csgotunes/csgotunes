@@ -57,7 +57,7 @@ export const DashboardPage: React.FunctionComponent<any> = () => {
 
         const userConfig = `"CS:GO Tunes"
 {
- "uri" "https://csgotunes.azurewebsites.net/api/game-state?spotifyUserID=${encodedSpotifyUserId}&cfgKey=${encodedCFGKey}"
+ "uri" "${getApiBaseUrl()}/game-state?spotifyUserID=${encodedSpotifyUserId}&cfgKey=${encodedCFGKey}"
  "timeout" "5.0"
  "buffer"  "0.1"
  "throttle" "0.5"
