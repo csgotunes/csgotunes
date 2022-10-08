@@ -8,5 +8,9 @@
   "copy_cfg_to_clipboard_button": "Copy CFG to Clipboard",
   "disclaimer": "CS:GO Tunes is not affiliated with Valve or Spotify.",
   "enable_button": "Enable CS:GO Tunes",
-  "disable_button": "Disable CS:GO Tunes"
+  "disable_button": "Disable CS:GO Tunes",
+  "instructions_title": "Instructions",
+  "instructions_step_one": "Download the CFG above, or copy the text above to a file yourself.",
+  "instructions_step_two": "Save the file to <em>\\Steam\\steamapps\\common\\Counter-Strike Global Offensive\\csgo\\cfg\\gamestate_integration_csgotunes.cfg</em>",
+  "instructions_step_two_hint": "You can easily find this directory by going to Steam, right-clicking Counter-Strike: Global Offensive, and going to <em>Manage -> Browse local files</em>. Then just navigate to csgo -> cfg"
 }
