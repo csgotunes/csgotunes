@@ -162,6 +162,16 @@ export const DashboardPage: React.FunctionComponent<any> = () => {
       <div>
         <button onClick={copyConfig} disabled={isLoading}>{t('copy_cfg_to_clipboard_button')}</button>
       </div>
+      <h5>{t('instructions_title')}</h5>
+      <ol>
+        <li dangerouslySetInnerHTML={ { __html: t('instructions_step_one', { interpolation: { escapeValue: false } }) } } />
+        <li>
+          <ul>
+            <li dangerouslySetInnerHTML={ { __html: t('instructions_step_two', { interpolation: { escapeValue: false } }) } } />
+            <li dangerouslySetInnerHTML={ { __html: t('instructions_step_two_hint', { interpolation: { escapeValue: false } }) } } />
+          </ul>
+        </li>
+      </ol>
     </div>
   );
 };
